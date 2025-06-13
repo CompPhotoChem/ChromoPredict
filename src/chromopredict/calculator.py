@@ -3,6 +3,8 @@ from rdkit.Chem.Draw import rdMolDraw2D
 import io
 from PIL import Image
 
+from chromopredict.strucfeatures import *
+from chromopredict import *
 
 def combine_data(
         base, 

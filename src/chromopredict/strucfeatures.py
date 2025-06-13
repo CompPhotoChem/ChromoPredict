@@ -1,9 +1,7 @@
 from typing import Callable, Dict, Optional, Sequence, Union
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
-import io
-from PIL import Image
-
+from chromopredict import *
 
 def check_pattern(
         mol, 

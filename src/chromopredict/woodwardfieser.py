@@ -26,6 +26,12 @@ factors = {
     "endocyclic_double_bond": "[#6;R]=[#6;R]"
 }
 
+woodward_factor_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Regeln
+    "conjugated_double_bond": 30,
+    "exocyclic_double_bond": 5,
+    "homoanular_cyclodiene": 39
+}
+
 # increments from substituents
 woodward_subs = {
     "alkoxy": "[#8]-[#6]",

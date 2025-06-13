@@ -1,4 +1,6 @@
-import fieser, fieserkuhn, woodwardfieser
+from chromopredict.fieser import *
+from chromopredict.fieserkuhn import *
+from chromopredict.woodwardfieser import *
 
 # library of base chromophores
 base_library = {
