@@ -16,7 +16,7 @@ woodward_base_values = { # doi: textbook
     "alpha_beta_ester": 195,
     "cyclopentenone": 202,
     "cyclohexanone": 215, # doi: 10.1021/jo01164a003
-    "alpha_beta_acid" : 195, # doi: 
+    "alpha_beta_acid" : 195, # doi: 10.47191/ijpbms/v3-i7-05
 }
 
 # increments from additional double bonds

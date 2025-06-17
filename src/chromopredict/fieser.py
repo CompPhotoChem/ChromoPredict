@@ -38,7 +38,7 @@ fieser_subs = {
     "carboxy": "[#6](=[#8])-[#8H]",
 }
 
-fieser_sub_values = {
+fieser_sub_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Regeln
     "alkoxy": 6,
     "alkyl": 5,
     "carboxy": 0,
