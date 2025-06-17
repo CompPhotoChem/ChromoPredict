@@ -1,4 +1,6 @@
 from chromopredict import *
+from chromopredict.woodward import *
+#from chromopredict import woodward
 from chromopredict.utils import *
 from chromopredict.solvent import *
 from chromopredict.woodwardfieser import *
