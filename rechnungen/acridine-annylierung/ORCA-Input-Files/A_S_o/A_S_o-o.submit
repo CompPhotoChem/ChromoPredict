@@ -12,8 +12,8 @@
 # change input name below here
 ############################################################
 
- jobname="neb_Rh3phenP_180" #name of your input file without ending
- workdir="."
+ jobname="A_S_o-o" #name of your input file without ending
+ workdir="/home/woody/bccc/bccc130h/acridine_annylation/ORCA-Input-Files/A_S_o"
 
 ############################################################
 # change nothing below here unless you are sure
@@ -72,18 +72,28 @@ $ORCA ${jobname}.inp > $SLURM_SUBMIT_DIR/${jobname}.out
 $ORCA2MKL ${jobname} - molden
 $ORCA2MKL ${jobname} - fchk
 
-echo -n "Stopping run at: "
-date
-
 # move results and tidy up:
 echo "move remaining temporary files to SLURM_SUBMIT_DIR"
+resultdir="/home/woody/bccc/bccc130h/orca_results/${jobname}_${SLURM_JOB_ID}"
+
+mkdir -p "$resultdir"
+relevant_ext="out gbw molden fchk xyz prop charges hess"
+
+for ext in $relevant_ext; do
+  if [ -f "${jobname}.${ext}" ]; then
+    cp "${jobname}.${ext}" "$resultdir/"
+  fi
+done
+
+cp -v ${jobname}.*.trj "$resultdir/" 2>/dev/null || true
+
+cp "$SLURM_SUBMIT_DIR/${jobname}.out" "$resultdir/" 2>/dev/null || true
+
+echo "Results saved to: $resultdir"
+
 rm -f mpirun
 
-if [ ${workdir} != "." ]; then
-  cp -a * $SLURM_SUBMIT_DIR
-  cd $SLURM_SUBMIT_DIR
-  rm -rf ${workdir}
+if [ "${workdir}" != "." ]; then
+  cd "$SLURM_SUBMIT_DIR"
+  rm -rf "${workdir}"
 fi
-
-
-
