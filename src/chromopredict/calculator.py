@@ -14,7 +14,8 @@ def combine_data(
         mol, 
         solvent, 
         debug, 
-        extended
+        extended,
+        multi
         ):
 
     """
@@ -37,6 +38,7 @@ def combine_data(
     """
 
     total = 0
+    d_contrib = {}
     
     if mol_type == "fieser":
         total += check_values(base, mol_type, base_value_library)
@@ -45,11 +47,10 @@ def combine_data(
         total += count_exo_bonds(mol) * 5
 
         if debug:
-            print("Fieser-Calculation:")
-            print("Base:", check_values(base, mol_type, base_value_library))
-            print("Factor", check_values(factor, mol_type, factor_value_library))
-            print("Subs:", check_values(subs, mol_type, sub_value_library))
-            print("Exo-Value:", count_exo_bonds(mol) * 5)
+            d_contrib["base"] = check_values(base, mol_type, base_value_library)
+            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+            d_contrib["subs"] = check_values(subs, mol_type, sub_value_library)
+            d_contrib["exo"] = count_exo_bonds(mol) * 5
     
     elif mol_type == "fieser_kuhn":
         factors = check_values(factor, mol_type, factor_value_library, False)
@@ -62,12 +63,30 @@ def combine_data(
         print("e_max: ", epsilon)
 
         if debug:
-            print("Fieser-Kuhn-Calculation:")
-            print("M:", m)
-            print("N:", n)
-            print("Endo:", endo)
-            print("Exo:", exo)
+            d_contrib["M"] = m
+            d_contrib["N"] = n
+            d_contrib["endo"] = endo
+            d_contrib["exo"] = exo
     
+    elif multi and mol_type in ("woodward", "woodward_extended"):
+        total += check_values(base, mol_type, base_value_library)
+        total += check_values(factor, mol_type, factor_value_library)
+        total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
+        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
+        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
+        total += 5 * count_exo_bonds(mol)
+
+        if debug:
+            d_contrib['base'] = check_values(base, mol_type, base_value_library)
+            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+            d_contrib["alpha"] =  max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+            d_contrib["beta"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
+            d_contrib["gamma"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
+            d_contrib["higher"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
+            d_contrib["exo"] =  5 * count_exo_bonds(mol)
+
+
     elif not extended and mol_type in ("woodward", "woodward_extended"):
         total += check_values(base, mol_type, base_value_library)
         total += check_values(factor, mol_type, factor_value_library)
@@ -78,15 +97,30 @@ def combine_data(
         total += 5 * count_exo_bonds(mol)
 
         if debug:
-            print("Woodward-Calculation (mol-Type =", mol_type, "):")
-            print("Base:", check_values(base, mol_type, base_value_library))
-            print("Factor:", check_values(factor, mol_type, factor_value_library))
-            print("Alpha:", max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0))
-            print("Beta:", max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0))
-            print("Gamma:", max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0))
-            print("Higher:", max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0))
-            print("Exo:", 5 * count_exo_bonds(mol))
+            d_contrib['base'] = check_values(base, mol_type, base_value_library)
+            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+            d_contrib["exo"] =  5 * count_exo_bonds(mol)
 
+            def get_max_sub(pos='alpha'):
+
+                pos_subs = [sub for sub in subs if sub["sub_type"] == pos]
+                pos_max = max(pos_subs, key=lambda x: x["value"], default=None)
+
+                if pos_max:
+                    max_val, max_sub = pos_max['value'], pos_max['pattern']
+                else:
+                    max_val, max_sub = 0, 'H'
+
+                return max_sub
+
+            d_contrib["alpha"] = get_max_sub("alpha")
+            d_contrib["beta"] = get_max_sub("beta")
+            d_contrib["gamma"] = get_max_sub("gamma")
+            d_contrib["higher"] = get_max_sub("higher")
+
+            #d_contrib["beta"] = max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
+            #d_contrib["gamma"] = max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0)
+            #d_contrib["higher"] = max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0)
     
     elif extended and mol_type in ("woodward", "woodward_extended"):
         total += 212.82 
@@ -94,16 +128,15 @@ def combine_data(
         total += 4.79 * count_exo_bonds(mol)
 
         if debug:
-            print("Woodward-Extended-Calculation:")
-            print("Subs:", len(subs))
-            print("Exo:", count_exo_bonds(mol))
+            d_contrib['subs'] = len(subs)
+            d_contrib['exo'] = count_exo_bonds(mol)
     
     total += solvent_values.get(solvent, 0)
 
     if debug:
-        print("Solvent:", solvent_values.get(solvent, 0))
+        d_contrib["solvent"] = solvent_values.get(solvent, 0)
 
-    return round(total)
+    return round(total), d_contrib
 
 def draw_images(mol):
     highlight_atom_colors = {}
@@ -139,7 +172,8 @@ def predict(
         solvent, 
         draw=False, 
         debug = False, 
-        extended = True
+        extended = True,
+        multi = False
         ):
 
     """
@@ -182,6 +216,8 @@ def predict(
     if draw:
         im.show()
 
-    return combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended), im
+    pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended, multi)
+
+    return pred, contrib, im
 
 

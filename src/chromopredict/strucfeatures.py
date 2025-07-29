@@ -276,8 +276,8 @@ def get_woodward_sub_values(mol):
                     if neighbor.HasProp("sub_type"):
                         if neighbor.GetProp("sub_type") == "0":
                             continue
-                        # print("Name: ", patternName, ", Position: ", neighbor.GetProp("sub_type"), ", Wert: ", woodward_sub_values[neighbor.GetProp("sub_type")][patternName])
-                        result.append({"value": woodward_sub_values[neighbor.GetProp("sub_type")][patternName], "sub_type": neighbor.GetProp("sub_type")})
+                        #print("Name: ", patternName, ", Position: ", neighbor.GetProp("sub_type"), ", Wert: ", woodward_sub_values[neighbor.GetProp("sub_type")][patternName])
+                        result.append({'pattern': patternName, "value": woodward_sub_values[neighbor.GetProp("sub_type")][patternName], "sub_type": neighbor.GetProp("sub_type")})
                         useful = True
                         break
             if useful:
