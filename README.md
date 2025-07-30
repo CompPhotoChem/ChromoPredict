@@ -2,7 +2,7 @@
 
 Automated application of Woodward-Fieser, Fieser and Fieser-Kuhn rules to predict absorption maxima of enones, dienes and systems with more than four conjugated carbon-carbon double bonds.
 
-Examples:
+## Woodward-Type Examples
 
 <table>
   <tr>
