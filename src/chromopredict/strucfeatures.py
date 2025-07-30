@@ -255,7 +255,9 @@ def mark_atoms(mol):
         if neighbor.GetAtomicNum() == 6:
             identify_atom(mol, neighbor.GetIdx(), 1, doubIdx)
                 
-def get_woodward_sub_values(mol):
+def get_woodward_sub_values(mol, sub_values_lib=woodward_sub_values):
+
+    mark_atoms(mol)
     result = []
 
     for patternName, smarts in woodward_subs.items():
@@ -276,13 +278,23 @@ def get_woodward_sub_values(mol):
                     if neighbor.HasProp("sub_type"):
                         if neighbor.GetProp("sub_type") == "0":
                             continue
-                        #print("Name: ", patternName, ", Position: ", neighbor.GetProp("sub_type"), ", Wert: ", woodward_sub_values[neighbor.GetProp("sub_type")][patternName])
-                        result.append({'pattern': patternName, "value": woodward_sub_values[neighbor.GetProp("sub_type")][patternName], "sub_type": neighbor.GetProp("sub_type")})
+                       
+                        val = get_value(patternName, sub_values_lib, neighbor)
+                        result.append(val)
                         useful = True
                         break
             if useful:
                 for idx in match:
                     mol.GetAtomWithIdx(idx).SetProp("used", "2")
     return result      
+
+def get_value(patternName, ruleset, neighbor):
+
+    _res = {"pattern": patternName, 
+            "value": ruleset[neighbor.GetProp("sub_type")][patternName], 
+            "sub_type": neighbor.GetProp("sub_type")
+            }
+
+    return _res
 
 

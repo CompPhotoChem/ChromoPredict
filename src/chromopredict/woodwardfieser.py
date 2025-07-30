@@ -16,7 +16,16 @@ woodward_base_values = { # doi: textbook
     "alpha_beta_ester": 195,
     "cyclopentenone": 202,
     "cyclohexanone": 215, # doi: 10.1021/jo01164a003
-    "alpha_beta_acid" : 195, # doi: 10.47191/ijpbms/v3-i7-05
+    "alpha_beta_acid" : 195, # doi: 
+}
+
+woodward_refine_base_values = { # doi: textbook
+    "alpha_beta_aldehyd": 215,
+    "alpha_beta_ketone": 206,
+    "alpha_beta_ester": 195, #not refined
+    "cyclopentenone": 202, #not refined
+    "cyclohexanone": 215, #not refined
+    "alpha_beta_acid" : 192, 
 }
 
 # increments from additional double bonds
@@ -43,10 +52,17 @@ woodward_subs = {
 }
 
 woodward_sub_values = { # doi: 10.1021/jo01164a003, doi: 10.1021/jo01085a617
-    "alpha": {"alkoxy": 35, "hydroxy": 35, "alkyl": 10, "bromo": 5, "chloro": 5, "carboxy": 0},
-    "beta": {"alkoxy": 30, "hydroxy": 30, "alkyl": 12, "bromo": 10, "chloro": 5, "carboxy": 0},
-    "gamma": {"hydroxy": 50, "bromo": 30, "alkyl": 18, "alkoxy": 17, "carboxy": 12, "chloro": 12},
-    "higher": {"bromo": 30, "alkyl": 18, "carboxy": 12, "chloro": 12, "alkoxy": 0, "hydroxy": 0}
+    "alpha":  {"alkoxy": 35, "hydroxy": 35, "alkyl": 10, "bromo": 25, "chloro": 15, "carboxy":  0},
+    "beta":   {"alkoxy": 30, "hydroxy": 30, "alkyl": 12, "bromo": 30, "chloro": 12, "carboxy":  0},
+    "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
+    "higher": {"alkoxy":  0, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
+}
+
+woodward_refine_sub_values = {
+    "alpha":  {"alkoxy": 35, "hydroxy": 43, "alkyl": 14, "bromo": 40, "chloro": 29, "carboxy": 0},
+    "beta":   {"alkoxy": 23, "hydroxy": 17, "alkyl": 17, "bromo": 34, "chloro": 24, "carboxy": 0},
+    "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
+    "higher": {"alkoxy":  0, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
 }
 
 # anchors for plotting and structure assignments
@@ -56,3 +72,5 @@ woodward_markers = {
     3: "gamma",
     4: "higher"
 }
+
+

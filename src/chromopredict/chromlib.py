@@ -8,6 +8,7 @@ base_library = {
     "fieser_kuhn": fieser_kuhn_base,
     "woodward_extended": woodward_base,
     "woodward": woodward_base,
+    "woodward_refine": woodward_base,
 }
 
 sub_library = {
@@ -15,6 +16,7 @@ sub_library = {
     "fieser_kuhn": "None",
     "woodward_extended": woodward_subs,
     "woodward": woodward_subs,
+    "woodward_refine": woodward_subs,
 }
 
 factor_library = {
@@ -22,6 +24,7 @@ factor_library = {
     "fieser_kuhn": fieser_kuhn_factors,
     "woodward_extended": factors,
     "woodward": factors,
+    "woodward_refine": factors,
 }
 
 base_value_library = {
@@ -29,6 +32,7 @@ base_value_library = {
     "fieser_kuhn": fieser_kuhn_base_values,
     "woodward_extended": woodward_base_values,
     "woodward": woodward_base_values,
+    "woodward_refine": woodward_refine_base_values,
 }
 
 sub_value_library = {
@@ -36,6 +40,7 @@ sub_value_library = {
     "fieser_kuhn": "None",
     "woodward_extended": woodward_sub_values,
     "woodward": woodward_sub_values,
+    "woodward_refine": woodward_refine_sub_values,
 }
 
 factor_value_library = {
@@ -43,4 +48,5 @@ factor_value_library = {
     "fieser_kuhn": fieser_kuhn_factor_values,
     "woodward_extended": woodward_factor_values,
     "woodward": woodward_factor_values,
+    "woodward_refine": woodward_factor_values,
 }

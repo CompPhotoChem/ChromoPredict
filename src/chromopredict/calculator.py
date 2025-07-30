@@ -1,3 +1,4 @@
+import rdkit
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 import io
@@ -14,8 +15,7 @@ def combine_data(
         mol, 
         solvent, 
         debug, 
-        extended,
-        multi
+        extended
         ):
 
     """
@@ -68,23 +68,23 @@ def combine_data(
             d_contrib["endo"] = endo
             d_contrib["exo"] = exo
     
-    elif multi and mol_type in ("woodward", "woodward_extended"):
-        total += check_values(base, mol_type, base_value_library)
-        total += check_values(factor, mol_type, factor_value_library)
-        total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
-        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
-        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
-        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
-        total += 5 * count_exo_bonds(mol)
-
-        if debug:
-            d_contrib['base'] = check_values(base, mol_type, base_value_library)
-            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
-            d_contrib["alpha"] =  max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
-            d_contrib["beta"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
-            d_contrib["gamma"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
-            d_contrib["higher"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
-            d_contrib["exo"] =  5 * count_exo_bonds(mol)
+#    elif multi and mol_type in ("woodward", "woodward_extended"):
+#        total += check_values(base, mol_type, base_value_library)
+#        total += check_values(factor, mol_type, factor_value_library)
+#        total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
+#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
+#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
+#        total += 5 * count_exo_bonds(mol)
+#
+#        if debug:
+#            d_contrib['base'] = check_values(base, mol_type, base_value_library)
+#            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+#            d_contrib["alpha"] =  max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+#            d_contrib["beta"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
+#            d_contrib["gamma"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
+#            d_contrib["higher"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
+#            d_contrib["exo"] =  5 * count_exo_bonds(mol)
 
 
     elif not extended and mol_type in ("woodward", "woodward_extended"):
@@ -173,12 +173,17 @@ def predict(
         draw=False, 
         debug = False, 
         extended = True,
-        multi = False
+        refine = None
         ):
 
     """
     Parameters
     ----------
+    smiles ... isomeric SMILES string of a molecule
+    solvent ... SMILES string of a solvent
+    draw ... Boolean either return image or not
+    debug ... Boolean, if True returns dictionary of individual contributions
+              i.e. structural descriptors and their increments
 
     Returns
     -------
@@ -200,15 +205,16 @@ def predict(
     
     if mol_type is None:
         return None
+
     base = get_libData(mol, mol_type, base_library, 0)
     factor = get_libData(mol, mol_type, factor_library, 1)
 
     if mol_type == "woodward_extended" and factor is not None:
         mol_type = "woodward"
+
     if mol_type not in ["woodward", "woodward_extended"]:
         subs = get_libData(mol, mol_type, sub_library, 2)
     else:
-        mark_atoms(mol)
         subs = get_woodward_sub_values(mol)
         
     im = draw_images(mol)
@@ -216,8 +222,62 @@ def predict(
     if draw:
         im.show()
 
-    pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended, multi)
+    pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended)
 
     return pred, contrib, im
+
+
+def woodward_refine_predict(
+        smiles, 
+        solvent, 
+        draw=False, 
+        debug = False, 
+        ):
+
+    """
+    Parameters
+    ----------
+
+    smiles ... isomeric SMILES string of a molecule
+    solvent ... SMILES string of a solvent
+    draw ... Boolean either return image or not
+    debug ... Boolean, if True returns dictionary of individual contributions
+              i.e. structural descriptors and their increments
+
+    Returns
+    -------
+    Prediction of absorption maximum in nm and image object with
+    highlighted base chromophore and other structural fragments 
+    contributing as increments to the final computation
+
+    Examples
+    ---------
+
+    smi = 'CC(=O)C=CC1=C(C)CCCC1(C)C'
+    solv = 'CCCCCCC'
+
+    nm, img = predict(smi, solv)
+
+    """
+
+    mol_type_auto, mol = classify_type(smiles, general_rules)
+    
+    if 'woodward' in mol_type_auto:
+        base = get_libData(mol, 'woodward_refine', base_library, 0)
+        factor = get_libData(mol, 'woodward_refine', factor_library, 1)
+        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
+        
+        im = draw_images(mol)
+        if draw:
+            im.show()
+
+        mol_type = 'woodward'
+        pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended=False)
+    
+        return pred, contrib, im
+
+    else:
+        return None
+
 
 
