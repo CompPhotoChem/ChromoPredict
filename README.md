@@ -6,17 +6,29 @@ Examples:
 
 <table>
   <tr>
-    <td align="center">
+    <td align="left">
       <img src="https://github.com/CompPhotoChem/Woodward_Fieser_Rules/blob/main/examples/CC(C)%3DC(C)C%3DO.png" width="300px"><br>
-      <b>CC(C)=C(C)C=O</b>
+      <b>CC(C)=C(C)C=O</b><br>
+      <br>
+      <b>B3LYP:</b> 227 nm (cis), 231 nm (trans)<br>
+      <b>Woodward:</b> 232 nm<br>
+      <b>Woodward refined:</b> 241 nm<br>
     </td>
-    <td align="center">
+    <td align="left">
       <img src="https://github.com/CompPhotoChem/Woodward_Fieser_Rules/blob/main/examples/CC1%3DC2CCCCC2CCC1%3DO.png" width="300px"><br>
-      <b>CC1=C2CCCCC2CCC1=O</b>
+      <b>CC1=C2CCCCC2CCC1=O</b><br>
+      <br>
+      <b>Experiment:</b> 239 nm<br>
+      <b>Woodward:</b> 242 nm<br>
+      <b>Woodward refined:</b> 251 nm<br>
     </td>
-    <td align="center">
+    <td align="left">
       <img src="https://github.com/CompPhotoChem/Woodward_Fieser_Rules/blob/main/examples/CC(%3DO)C%3DCC1%3DC(C)CCCC1(C)C.png" width="300px"><br>
-      <b>CC(=O)C=CC1=C(C)CCCC1(C)C</b>
+      <b>CC(=O)C=CC1=C(C)CCCC1(C)C</b><br>
+      <br>
+      <b>Experiment:</b> 283 nm<br>
+      <b>Woodward:</b> 281 nm<br>
+      <b>Woodward refined:</b> 281 nm<br>
     </td>
   </tr>
 </table>
