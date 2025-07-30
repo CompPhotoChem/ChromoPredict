@@ -7,12 +7,12 @@ Examples:
 <table>
   <tr>
     <td align="left">
-      <img src="https://github.com/CompPhotoChem/Woodward_Fieser_Rules/blob/main/examples/CC(C)%3DC(C)C%3DO.png" width="300px"><br>
-      <b>CC(C)=C(C)C=O</b><br>
+      <img src="https://github.com/CompPhotoChem/ChromoPredict/blob/main/examples/CC(%3DO)C1%3DC(C)CCCC1.png" width="300px"><br>
+      <b>CC(=O)C1=C(C)CCCC1</b><br>
       <br>
-      <b>B3LYP:</b> 227 nm (cis), 231 nm (trans)<br>
-      <b>Woodward:</b> 232 nm<br>
-      <b>Woodward refined:</b> 241 nm<br>
+      <b>Experiment:</b> 247 nm<br>
+      <b>Woodward:</b> 237 nm<br>
+      <b>Woodward refined:</b> 246 nm<br>
     </td>
     <td align="left">
       <img src="https://github.com/CompPhotoChem/Woodward_Fieser_Rules/blob/main/examples/CC1%3DC2CCCCC2CCC1%3DO.png" width="300px"><br>
