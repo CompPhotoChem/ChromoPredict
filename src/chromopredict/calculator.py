@@ -7,6 +7,19 @@ from PIL import Image
 from chromopredict.strucfeatures import *
 from chromopredict import *
 
+
+def get_max_sub(subs, pos='alpha'):
+
+    pos_subs = [sub for sub in subs if sub["sub_type"] == pos]
+    pos_max = max(pos_subs, key=lambda x: x["value"], default=None)
+
+    if pos_max:
+        max_val, max_sub = pos_max['value'], pos_max['pattern']
+    else:
+        max_val, max_sub = 0, 'H'
+
+    return max_sub, pos_subs
+
 def combine_data(
         base, 
         factor, 
@@ -101,26 +114,10 @@ def combine_data(
             d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
             d_contrib["exo"] =  5 * count_exo_bonds(mol)
 
-            def get_max_sub(pos='alpha'):
-
-                pos_subs = [sub for sub in subs if sub["sub_type"] == pos]
-                pos_max = max(pos_subs, key=lambda x: x["value"], default=None)
-
-                if pos_max:
-                    max_val, max_sub = pos_max['value'], pos_max['pattern']
-                else:
-                    max_val, max_sub = 0, 'H'
-
-                return max_sub
-
-            d_contrib["alpha"] = get_max_sub("alpha")
-            d_contrib["beta"] = get_max_sub("beta")
-            d_contrib["gamma"] = get_max_sub("gamma")
-            d_contrib["higher"] = get_max_sub("higher")
-
-            #d_contrib["beta"] = max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
-            #d_contrib["gamma"] = max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0)
-            #d_contrib["higher"] = max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0)
+            d_contrib["alpha"], d_contrib['alpha_all']  = get_max_sub(pos="alpha", subs=subs)
+            d_contrib["beta"], d_contrib["beta_all"] = get_max_sub(pos="beta", subs=subs)
+            d_contrib["gamma"], d_contrib["gamma_all"] = get_max_sub(pos="gamma", subs=subs)
+            d_contrib["higher"], d_contrib["higher_all"] = get_max_sub(pos="higher", subs=subs)
     
     elif extended and mol_type in ("woodward", "woodward_extended"):
         total += 212.82 
@@ -228,56 +225,52 @@ def predict(
 
 
 def woodward_refine_predict(
-        smiles, 
-        solvent, 
-        draw=False, 
-        debug = False, 
-        ):
-
+        smiles,
+        solvent,
+        draw=False,
+        debug=False,
+    ):
     """
     Parameters
     ----------
-
     smiles ... isomeric SMILES string of a molecule
     solvent ... SMILES string of a solvent
     draw ... Boolean either return image or not
     debug ... Boolean, if True returns dictionary of individual contributions
-              i.e. structural descriptors and their increments
 
     Returns
     -------
     Prediction of absorption maximum in nm and image object with
     highlighted base chromophore and other structural fragments 
     contributing as increments to the final computation
-
-    Examples
-    ---------
-
-    smi = 'CC(=O)C=CC1=C(C)CCCC1(C)C'
-    solv = 'CCCCCCC'
-
-    nm, img = predict(smi, solv)
-
     """
 
+    mol = Chem.MolFromSmiles(smiles)
+
+    enon_pattern = Chem.MolFromSmarts('C=CC=O')
+
+    if not mol or not mol.GetSubstructMatches(enon_pattern):
+        # Fallback to general predictor
+        return predict(smiles, solvent, draw=draw, debug=debug, extended=True, refine=None)
+
     mol_type_auto, mol = classify_type(smiles, general_rules)
-    
+
     if 'woodward' in mol_type_auto:
         base = get_libData(mol, 'woodward_refine', base_library, 0)
         factor = get_libData(mol, 'woodward_refine', factor_library, 1)
         subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
-        
+
         im = draw_images(mol)
         if draw:
             im.show()
 
         mol_type = 'woodward'
         pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended=False)
-    
+
         return pred, contrib, im
 
     else:
-        return None
-
+        # Fallback if not classified as woodward
+        return predict(smiles, solvent, draw=draw, debug=debug, extended=True, refine=None)
 
 
