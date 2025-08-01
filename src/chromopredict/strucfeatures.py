@@ -204,7 +204,29 @@ def count_single_double(mol):
             count += 2
         else:
             exists = False
+
     return count
+
+
+def count_conjugated_double_bonds(mol):
+    base_pattern = "[#6]=[#6]"
+    max_count = 0
+    current_pattern = base_pattern
+    has_match = True
+
+    while has_match:
+        pattern = Chem.MolFromSmarts(current_pattern)
+        matches = mol.GetSubstructMatches(pattern)
+
+        if matches:
+            num_dbs = current_pattern.count("=[#6]")
+            max_count = num_dbs
+            current_pattern += "-[#6]=[#6]"
+        else:
+            has_match = False
+
+    return max_count
+
 
 def identify_atom(mol, pos, pos_type, double_indexes):
     atom = mol.GetAtomWithIdx(pos)

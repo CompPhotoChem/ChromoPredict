@@ -19,3 +19,4 @@ fieser_kuhn_factor_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Reg
     "endocyclic_double_bond": 1,
     "alkyl" : 1
 }
+

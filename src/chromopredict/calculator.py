@@ -1,3 +1,4 @@
+import warnings
 import rdkit
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -7,8 +8,157 @@ from PIL import Image
 from chromopredict.strucfeatures import *
 from chromopredict import *
 
+def __woodward_calc(
+        base,
+        factor,
+        subs,
+        mol,
+        solvent,
+        verbose,
+        mol_type='woodward'
+        ):
 
-def get_max_sub(subs, pos='alpha'):
+    total = 0
+    d_contrib = {}
+
+    # base values
+    total += check_values(base, mol_type, base_value_library)
+    total += check_values(factor, mol_type, factor_value_library)
+
+    # increments for substituents
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0)
+    
+    # exocyclic bonds
+    total += 5 * count_exo_bonds(mol)
+    
+    # solvent
+    total += solvent_values.get(solvent, 0)
+
+    if verbose:
+        # base values
+        d_contrib['base'] = check_values(base, mol_type, base_value_library)
+        d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+
+        # increments for substituents
+        d_contrib["alpha"], d_contrib['alpha_all']  = __get_max_sub(pos="alpha", subs=subs)
+        d_contrib["beta"], d_contrib["beta_all"] = __get_max_sub(pos="beta", subs=subs)
+        d_contrib["gamma"], d_contrib["gamma_all"] = __get_max_sub(pos="gamma", subs=subs)
+        d_contrib["higher"], d_contrib["higher_all"] = __get_max_sub(pos="higher", subs=subs) 
+        
+        # exocyclic bonds
+        d_contrib["exo"] =  5 * count_exo_bonds(mol)
+        
+        # solvent
+        d_contrib["solvent"] = solvent_values.get(solvent, 0)
+
+    return round(total), d_contrib
+
+
+def __woodward_extended_calc(
+        base,
+        factor,
+        subs,
+        mol,
+        solvent,
+        verbose,
+        mol_type='woodward_extended'
+        ):
+
+    total = 0
+    d_contrib = {}
+
+    # base value
+    total += 212.82
+
+    # substituent contributions
+    total += 11.37 * len(subs)
+    total += 4.79 * count_exo_bonds(mol)
+    
+    # solvent
+    total += solvent_values.get(solvent, 0)
+
+    if verbose:
+        d_contrib['subs'] = len(subs)
+        d_contrib['exo'] = count_exo_bonds(mol)
+        d_contrib["solvent"] = solvent_values.get(solvent, 0)
+
+    return round(total), d_contrib
+
+
+def __fieser_calc(
+        base,
+        factor,
+        subs,
+        mol,
+        solvent,
+        verbose,
+        mol_type='fieser'
+        ):
+
+    total = 0
+    d_contrib = {}
+
+    # base values
+    total += check_values(base, mol_type, base_value_library)
+    total += check_values(factor, mol_type, factor_value_library)
+    total += check_values(subs, mol_type, sub_value_library)
+    total += count_exo_bonds(mol) * 5
+
+    # solvent
+    total += solvent_values.get(solvent, 0)
+    
+    if verbose:
+        # base values
+        d_contrib["base"] = check_values(base, mol_type, base_value_library)
+        d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
+
+        # substituents
+        d_contrib["subs"] = check_values(subs, mol_type, sub_value_library, single=False)
+        d_contrib["exo"] = count_exo_bonds(mol) * 5
+
+    return round(total), d_contrib
+
+
+def __fieser_kuhn_calc(
+        base,
+        factor,
+        subs,
+        mol,
+        solvent,
+        verbose,
+        mol_type='fieser_kuhn'
+        ):
+
+    d_contrib = {}
+
+    factors = check_values(factor, mol_type, factor_value_library, False)
+
+    # get ingredients
+    m = factors.get("alkyl", 0)
+    n = count_conjugated_double_bonds(mol)
+    endo = factors.get("endocyclic_double_bond", 0)
+    exo = count_exo_bonds(mol)
+
+    total = 114 + 5*m + n*(48 - 1.7*n) - 16.5*endo - 10*exo
+    epsilon = 17400 * n
+
+    # solvent
+    total += solvent_values.get(solvent, 0)
+
+    if verbose:
+        d_contrib["M"] = m
+        d_contrib["N"] = n
+        d_contrib["endo"] = endo
+        d_contrib["exo"] = exo
+        d_contrib["epsilon"] = epsilon
+
+    return round(total), d_contrib
+
+
+def __get_max_sub(subs, pos='alpha'):
 
     pos_subs = [sub for sub in subs if sub["sub_type"] == pos]
     pos_max = max(pos_subs, key=lambda x: x["value"], default=None)
@@ -20,120 +170,6 @@ def get_max_sub(subs, pos='alpha'):
 
     return max_sub, pos_subs
 
-def combine_data(
-        base, 
-        factor, 
-        subs, 
-        mol_type, 
-        mol, 
-        solvent, 
-        debug, 
-        extended
-        ):
-
-    """
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    Prediction of absorption maximum in nm and image object with
-    highlighted base chromophore and other structural fragments 
-    contributing as increments to the final computation
-
-
-    Examples
-    --------
-
-    ...
-
-    """
-
-    total = 0
-    d_contrib = {}
-    
-    if mol_type == "fieser":
-        total += check_values(base, mol_type, base_value_library)
-        total += check_values(factor, mol_type, factor_value_library)
-        total += check_values(subs, mol_type, sub_value_library)
-        total += count_exo_bonds(mol) * 5
-
-        if debug:
-            d_contrib["base"] = check_values(base, mol_type, base_value_library)
-            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
-            d_contrib["subs"] = check_values(subs, mol_type, sub_value_library)
-            d_contrib["exo"] = count_exo_bonds(mol) * 5
-    
-    elif mol_type == "fieser_kuhn":
-        factors = check_values(factor, mol_type, factor_value_library, False)
-        m = factors.get("alkyl", 0)
-        n = count_single_double(mol)
-        endo = factors.get("endocyclic_double_bond", 0)
-        exo = count_exo_bonds(mol)
-        total = 114 + 5 * m + 48 * n - 1.7 * n ** 2 - 16.5 * endo - 10 * exo
-        epsilon = 17400 * n
-        print("e_max: ", epsilon)
-
-        if debug:
-            d_contrib["M"] = m
-            d_contrib["N"] = n
-            d_contrib["endo"] = endo
-            d_contrib["exo"] = exo
-    
-#    elif multi and mol_type in ("woodward", "woodward_extended"):
-#        total += check_values(base, mol_type, base_value_library)
-#        total += check_values(factor, mol_type, factor_value_library)
-#        total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
-#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
-#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
-#        total += sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
-#        total += 5 * count_exo_bonds(mol)
-#
-#        if debug:
-#            d_contrib['base'] = check_values(base, mol_type, base_value_library)
-#            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
-#            d_contrib["alpha"] =  max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
-#            d_contrib["beta"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "beta"])
-#            d_contrib["gamma"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "gamma"])
-#            d_contrib["higher"] = sum([sub["value"] for sub in subs if sub["sub_type"] == "higher"])
-#            d_contrib["exo"] =  5 * count_exo_bonds(mol)
-
-
-    elif not extended and mol_type in ("woodward", "woodward_extended"):
-        total += check_values(base, mol_type, base_value_library)
-        total += check_values(factor, mol_type, factor_value_library)
-        total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
-        total += max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
-        total += max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0)
-        total += max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0)
-        total += 5 * count_exo_bonds(mol)
-
-        if debug:
-            d_contrib['base'] = check_values(base, mol_type, base_value_library)
-            d_contrib["factor"] = check_values(factor, mol_type, factor_value_library)
-            d_contrib["exo"] =  5 * count_exo_bonds(mol)
-
-            d_contrib["alpha"], d_contrib['alpha_all']  = get_max_sub(pos="alpha", subs=subs)
-            d_contrib["beta"], d_contrib["beta_all"] = get_max_sub(pos="beta", subs=subs)
-            d_contrib["gamma"], d_contrib["gamma_all"] = get_max_sub(pos="gamma", subs=subs)
-            d_contrib["higher"], d_contrib["higher_all"] = get_max_sub(pos="higher", subs=subs)
-    
-    elif extended and mol_type in ("woodward", "woodward_extended"):
-        total += 212.82 
-        total += 11.37 * len(subs)
-        total += 4.79 * count_exo_bonds(mol)
-
-        if debug:
-            d_contrib['subs'] = len(subs)
-            d_contrib['exo'] = count_exo_bonds(mol)
-    
-    total += solvent_values.get(solvent, 0)
-
-    if debug:
-        d_contrib["solvent"] = solvent_values.get(solvent, 0)
-
-    return round(total), d_contrib
 
 def draw_images(mol):
     highlight_atom_colors = {}
@@ -164,13 +200,45 @@ def draw_images(mol):
 
     return Image.open(io.BytesIO(png))
 
+
+def __select_mol_type(mol_type_auto, chromlib=None):
+
+    # Define categories as sets
+    categories = {
+        'woodward': {'woodward', 'woodward_extended', 'woodward_refine'},
+        'fieser': {'fieser'},
+        'fieser_kuhn': {'fieser_kuhn'},
+    }
+
+    # Reverse lookup: map each rule to its category name
+    rule_to_category = {
+        rule: cat
+        for cat, rules in categories.items()
+        for rule in rules
+    }
+
+    if not chromlib:
+        return mol_type_auto
+
+    detected_cat = rule_to_category.get(mol_type_auto)
+    requested_cat = rule_to_category.get(chromlib)
+
+    if detected_cat == requested_cat:
+        return chromlib
+    else:
+        warnings.warn(
+            f"Requested rule set '{chromlib}' is incompatible with detected rule set '{mol_type_auto}'. "
+            f"Proceeding with detected type '{mol_type_auto}'."
+        )
+        return mol_type_auto
+
+
 def predict(
         smiles, 
         solvent, 
         draw=False, 
-        debug = False, 
-        extended = True,
-        refine = None
+        verbose=False, 
+        chromlib=None
         ):
 
     """
@@ -179,7 +247,7 @@ def predict(
     smiles ... isomeric SMILES string of a molecule
     solvent ... SMILES string of a solvent
     draw ... Boolean either return image or not
-    debug ... Boolean, if True returns dictionary of individual contributions
+    verbose ... Boolean, if True returns dictionary of individual contributions
               i.e. structural descriptors and their increments
 
     Returns
@@ -198,79 +266,43 @@ def predict(
 
     """
 
-    mol_type, mol = classify_type(smiles, general_rules)
+    mol_type_auto, mol = classify_type(smiles, general_rules)
     
-    if mol_type is None:
-        return None
+    # handle rule set selection with user constraints
+    mol_type = __select_mol_type(mol_type_auto, chromlib)
 
+    # get baselib and factor lib
     base = get_libData(mol, mol_type, base_library, 0)
     factor = get_libData(mol, mol_type, factor_library, 1)
 
     if mol_type == "woodward_extended" and factor is not None:
         mol_type = "woodward"
 
-    if mol_type not in ["woodward", "woodward_extended"]:
+    # get substituent libraries
+    if mol_type == 'fieser':
         subs = get_libData(mol, mol_type, sub_library, 2)
-    else:
+        pred, contrib = __fieser_calc(base, factor, subs, mol, solvent, verbose)
+
+    if mol_type == 'fieser_kuhn':
+        subs = get_libData(mol, mol_type, sub_library, 2)
+        pred, contrib = __fieser_kuhn_calc(base, factor, subs, mol, solvent, verbose)
+
+    elif mol_type == 'woodward':
         subs = get_woodward_sub_values(mol)
+        pred, contrib = __woodward_calc(base, factor, subs, mol, solvent, verbose)
+
+    elif mol_type == 'woodward_refine':
+        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
+        pred, contrib = __woodward_calc(base, factor, subs, mol, solvent, verbose)
         
+    elif mol_type == 'woodward_extended':
+        subs = get_woodward_sub_values(mol)
+        pred, contrib = __woodward_extended_calc(base, factor, subs, mol, solvent, verbose)
+
     im = draw_images(mol)
-    
     if draw:
         im.show()
 
-    pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended)
-
     return pred, contrib, im
-
-
-def woodward_refine_predict(
-        smiles,
-        solvent,
-        draw=False,
-        debug=False,
-    ):
-    """
-    Parameters
-    ----------
-    smiles ... isomeric SMILES string of a molecule
-    solvent ... SMILES string of a solvent
-    draw ... Boolean either return image or not
-    debug ... Boolean, if True returns dictionary of individual contributions
-
-    Returns
-    -------
-    Prediction of absorption maximum in nm and image object with
-    highlighted base chromophore and other structural fragments 
-    contributing as increments to the final computation
-    """
-
-    mol = Chem.MolFromSmiles(smiles)
-
-    enon_pattern = Chem.MolFromSmarts('C=CC=O')
-
-    if not mol or not mol.GetSubstructMatches(enon_pattern):
-        # Fallback to general predictor
-        return predict(smiles, solvent, draw=draw, debug=debug, extended=True, refine=None)
-
-    mol_type_auto, mol = classify_type(smiles, general_rules)
-
-    if 'woodward' in mol_type_auto:
-        base = get_libData(mol, 'woodward_refine', base_library, 0)
-        factor = get_libData(mol, 'woodward_refine', factor_library, 1)
-        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
-
-        im = draw_images(mol)
-        if draw:
-            im.show()
-
-        mol_type = 'woodward'
-        pred, contrib = combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended=False)
-
-        return pred, contrib, im
-
-    else:
-        # Fallback if not classified as woodward
-        return predict(smiles, solvent, draw=draw, debug=debug, extended=True, refine=None)
 
 
