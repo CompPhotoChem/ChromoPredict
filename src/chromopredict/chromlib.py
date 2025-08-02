@@ -9,6 +9,7 @@ base_library = {
     "woodward_extended": woodward_base,
     "woodward": woodward_base,
     "woodward_refine": woodward_base,
+    "woodward_coumarin": woodward_coumarin,
 }
 
 sub_library = {
@@ -17,6 +18,7 @@ sub_library = {
     "woodward_extended": woodward_subs,
     "woodward": woodward_subs,
     "woodward_refine": woodward_subs,
+    "woodward_coumarin": woodward_subs,
 }
 
 factor_library = {
@@ -25,6 +27,7 @@ factor_library = {
     "woodward_extended": factors,
     "woodward": factors,
     "woodward_refine": factors,
+    "woodward_coumarin": factors,
 }
 
 base_value_library = {
@@ -33,6 +36,7 @@ base_value_library = {
     "woodward_extended": woodward_base_values,
     "woodward": woodward_base_values,
     "woodward_refine": woodward_refine_base_values,
+    "woodward_coumarin": woodward_refine_base_values,
 }
 
 sub_value_library = {
@@ -41,6 +45,7 @@ sub_value_library = {
     "woodward_extended": woodward_sub_values,
     "woodward": woodward_sub_values,
     "woodward_refine": woodward_refine_sub_values,
+    "woodward_coumarin": woodward_refine_sub_values,
 }
 
 factor_value_library = {
@@ -49,4 +54,5 @@ factor_value_library = {
     "woodward_extended": woodward_factor_values,
     "woodward": woodward_factor_values,
     "woodward_refine": woodward_factor_values,
+    "woodward_coumarin": woodward_factor_values,
 }

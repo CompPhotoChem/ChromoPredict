@@ -54,7 +54,6 @@ def check_pattern(
             
             matches = mol.GetSubstructMatches(pattern)
 
-
             for match in matches:
                 if version == 0: 
                     result.append(patternName)
@@ -63,6 +62,7 @@ def check_pattern(
                         for idx in match:
                             if patternName != "homoanular_cyclic":  # "homoanular_cyclodiene"
                                 mol.GetAtomWithIdx(idx).SetProp("used", "0")
+                                #print(mol.GetAtomWithIdx(idx).GetProp('used'))
                             else:
                                 atom = mol.GetAtomWithIdx(idx)
                                 in_double_bond = False
@@ -74,6 +74,7 @@ def check_pattern(
                                     mol.GetAtomWithIdx(idx).SetProp("used", "0")
                     big_break = True
                     break
+
                 elif version in [1, 2]:
                     if all(not mol.GetAtomWithIdx(idx).HasProp("used") for idx in match):
                         accepted_neighbor = False
@@ -123,16 +124,22 @@ def use_library(bookTitle, library):
         raise ValueError("No book found")
 
 def classify_type(smiles, rules):
+
     mol = Chem.MolFromSmiles(smiles)
 
     if mol is None:
         raise ValueError("Smiles to Mol conversion error")
+    
+    has_aromatic_bonds = any(bond.GetIsAromatic() for bond in mol.GetBonds())
+    if has_aromatic_bonds:
+        Chem.Kekulize(mol, clearAromaticFlags=True)
     
     type = check_pattern(mol, rules, False, 0, None)
 
     return type, mol
 
 def check_values(var, mol_type, library, single = True):
+    
     if var is None:
         if single:
             return 0
@@ -156,10 +163,12 @@ def check_values(var, mol_type, library, single = True):
             return {var: data[var]}
 
 def get_libData(mol, mol_type, library, version):
+    
     data = use_library(mol_type, library)
 
     if data == "None":
         return None
+    
     return check_pattern(mol, data, True, version, mol_type)
 
 def count_exo_bonds(mol):
@@ -229,11 +238,17 @@ def count_conjugated_double_bonds(mol):
 
 
 def identify_atom(mol, pos, pos_type, double_indexes):
+    
     atom = mol.GetAtomWithIdx(pos)
-
+    
     if pos in double_indexes:
         if atom.HasProp("used") and atom.GetProp("used") in ["0", "1"]:
-            if any((atom.GetNeighbors()[i].GetAtomicNum() in hetero_atoms) and not (atom.GetNeighbors()[i].HasProp("sub_type")) for i in range(len(atom.GetNeighbors()))):
+            if any(
+                    neighbor.GetAtomicNum() in hetero_atoms and not neighbor.HasProp("sub_type")
+                    for neighbor in atom.GetNeighbors()
+                    ):
+
+            #if any((atom.GetNeighbors()[i].GetAtomicNum() in hetero_atoms) and not (atom.GetNeighbors()[i].HasProp("sub_type")) for i in range(len(atom.GetNeighbors()))):
                 atom.SetProp("sub_type", woodward_markers.get(pos_type))
                 
                 if pos_type < 4:
@@ -256,6 +271,7 @@ def get_double_idx(mol):
     return idx
 
 def mark_atoms(mol):
+    
     start = Chem.MolFromSmarts("[#6]=[#8]")
 
     matches = mol.GetSubstructMatches(start)

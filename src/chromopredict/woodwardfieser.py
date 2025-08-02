@@ -1,6 +1,7 @@
 # Properties for enones
 
 # base chromophore units 
+
 woodward_base = {
     "alpha_beta_aldehyd": "[#6]=[#6]-[#6;H1](=[#8])",
     "alpha_beta_ketone": "[#6]=[#6]-[#6](=[#8])-[#6]",
@@ -10,22 +11,28 @@ woodward_base = {
     "cyclopentenone": "[#6]1:[#6]:[#6]:[#6]:[#6]:1(=[#8])",
 }
 
+woodward_coumarin = {
+    "alpha_beta_coumarin": "[#6]1=[#6]-[#6]=[#6]2-[#6](=[#6]-1)-[#6]=[#6]-[#6](-[#8]-2)=[#8]",
+}
+
 woodward_base_values = { # doi: textbook
     "alpha_beta_aldehyd": 210,
     "alpha_beta_ketone": 215,
     "alpha_beta_ester": 195,
     "cyclopentenone": 202,
     "cyclohexanone": 215, # doi: 10.1021/jo01164a003
-    "alpha_beta_acid" : 195, # doi: 
+    "alpha_beta_acid" : 195, 
 }
 
 woodward_refine_base_values = { # doi: textbook
-    "alpha_beta_aldehyd": 219,
-    "alpha_beta_ketone": 212,
+    "alpha_beta_aldehyd": 223,
+    "alpha_beta_ketone": 217,
     "alpha_beta_ester": 195, #not refined
     "cyclopentenone": 202, #not refined
     "cyclohexanone": 215, #not refined
-    "alpha_beta_acid" : 195, 
+    "alpha_beta_acid" : 200, 
+    # introduced by us
+    "alpha_beta_coumarin": 275,
 }
 
 # increments from additional double bonds
@@ -59,8 +66,8 @@ woodward_sub_values = { # doi: 10.1021/jo01164a003, doi: 10.1021/jo01085a617
 }
 
 woodward_refine_sub_values = {
-    "alpha":  {"alkoxy": 32, "hydroxy": 39, "alkyl": 11, "bromo": 39, "chloro": 29, "carboxy": 0},
-    "beta":   {"alkoxy": 22, "hydroxy": 14, "alkyl": 17, "bromo": 32, "chloro": 21, "carboxy": 0},
+    "alpha":  {"alkoxy": 29, "hydroxy": 37, "alkyl":  9, "bromo": 36, "chloro": 26, "carboxy": 0},
+    "beta":   {"alkoxy": 19, "hydroxy": 12, "alkyl": 14, "bromo": 30, "chloro": 19, "carboxy": 0},
     "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
     "higher": {"alkoxy":  0, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
 }

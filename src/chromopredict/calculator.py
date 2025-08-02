@@ -158,6 +158,43 @@ def __fieser_kuhn_calc(
     return round(total), d_contrib
 
 
+def __coumarin_calc(
+        base,
+        factor,
+        subs,
+        mol,
+        solvent,
+        verbose,
+        mol_type='woodward'
+        ):
+
+    total = 0
+    d_contrib = {}
+
+    # base values
+    total += check_values(base, mol_type, base_value_library)
+
+    # increments for substituents
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
+    
+    # solvent
+    total += solvent_values.get(solvent, 0)
+
+    if verbose:
+        # base values
+        d_contrib['base'] = check_values(base, mol_type, base_value_library)
+
+        # increments for substituents
+        d_contrib["alpha"], d_contrib['alpha_all']  = __get_max_sub(pos="alpha", subs=subs)
+        d_contrib["beta"], d_contrib["beta_all"] = __get_max_sub(pos="beta", subs=subs)
+        
+        # solvent
+        d_contrib["solvent"] = solvent_values.get(solvent, 0)
+
+    return round(total), d_contrib
+
+
 def __get_max_sub(subs, pos='alpha'):
 
     pos_subs = [sub for sub in subs if sub["sub_type"] == pos]
@@ -293,11 +330,15 @@ def predict(
 
     elif mol_type == 'woodward_refine':
         subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
-        pred, contrib = __woodward_calc(base, factor, subs, mol, solvent, verbose)
+        pred, contrib = __woodward_calc(base, factor, subs, mol, solvent, verbose, mol_type='woodward_refine')
         
     elif mol_type == 'woodward_extended':
         subs = get_woodward_sub_values(mol)
         pred, contrib = __woodward_extended_calc(base, factor, subs, mol, solvent, verbose)
+
+    elif mol_type == 'woodward_coumarin':
+        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
+        pred, contrib = __coumarin_calc(base, factor, subs, mol, solvent, verbose, mol_type='woodward_refine')
 
     im = draw_images(mol)
     if draw:
