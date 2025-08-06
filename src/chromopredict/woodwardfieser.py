@@ -25,14 +25,14 @@ woodward_base_values = { # doi: textbook
 }
 
 woodward_refine_base_values = { # doi: textbook
-    "alpha_beta_aldehyd": 223,
-    "alpha_beta_ketone": 217,
+    "alpha_beta_aldehyd": 218,
+    "alpha_beta_ketone": 212,
     "alpha_beta_ester": 195, #not refined
     "cyclopentenone": 202, #not refined
     "cyclohexanone": 215, #not refined
-    "alpha_beta_acid" : 200, 
+    "alpha_beta_acid" : 196, 
     # introduced by us
-    "alpha_beta_coumarin": 275,
+    "alpha_beta_coumarin": 312,
 }
 
 # increments from additional double bonds
@@ -59,17 +59,25 @@ woodward_subs = {
 }
 
 woodward_sub_values = { # doi: 10.1021/jo01164a003, doi: 10.1021/jo01085a617
-    "alpha":  {"alkoxy": 35, "hydroxy": 35, "alkyl": 10, "bromo": 25, "chloro": 15, "carboxy":  0},
-    "beta":   {"alkoxy": 30, "hydroxy": 30, "alkyl": 12, "bromo": 30, "chloro": 12, "carboxy":  0},
+    "alpha":  {"alkoxy": 35, "hydroxy": 35, "alkyl": 10, "bromo": 25, "chloro": 15, "carboxy": 12},
+    "beta":   {"alkoxy": 30, "hydroxy": 30, "alkyl": 12, "bromo": 30, "chloro": 12, "carboxy": 12},
     "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
-    "higher": {"alkoxy":  0, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
+    "higher": {"alkoxy": 31, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
 }
 
 woodward_refine_sub_values = {
-    "alpha":  {"alkoxy": 29, "hydroxy": 37, "alkyl":  9, "bromo": 36, "chloro": 26, "carboxy": 0},
-    "beta":   {"alkoxy": 19, "hydroxy": 12, "alkyl": 14, "bromo": 30, "chloro": 19, "carboxy": 0},
+    "alpha":  {"alkoxy": 28, "hydroxy": 38, "alkyl": 11, "bromo": 38, "chloro": 28, "carboxy": 12},
+    "beta":   {"alkoxy": 22, "hydroxy": 14, "alkyl": 18, "bromo": 33, "chloro": 22, "carboxy": 12},
     "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
-    "higher": {"alkoxy":  0, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
+    "higher": {"alkoxy": 31, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
+}
+
+woodward_coumarin_sub_values = {
+    "alpha":  {"alkoxy": -7, "hydroxy": -1, "alkyl": -1, "bromo":  4, "chloro":  4, "carboxy": 0},
+    "beta":   {"alkoxy": -8, "hydroxy":  3, "alkyl": -1, "bromo":  5, "chloro": -3, "carboxy": 0},
+    "gamma":  {"alkoxy":  0, "hydroxy":  0, "alkyl":  0, "bromo":  0, "chloro":  0, "carboxy": 0},
+    # optimized for 6-position in coumarines, 5,7,8-position would have different effects
+    "higher": {"alkoxy": 30, "hydroxy": 27, "alkyl": 15, "bromo":  10, "chloro": 10, "carboxy": 12}
 }
 
 # anchors for plotting and structure assignments
