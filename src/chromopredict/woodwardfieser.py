@@ -28,8 +28,8 @@ woodward_refine_base_values = { # doi: textbook
     "alpha_beta_aldehyd": 218,
     "alpha_beta_ketone": 212,
     "alpha_beta_ester": 195, #not refined
-    "cyclopentenone": 202, #not refined
-    "cyclohexanone": 215, #not refined
+    "cyclopentenone": 191, 
+    "cyclohexanone": 206,
     "alpha_beta_acid" : 196, 
     # introduced by us
     "alpha_beta_coumarin": 312,
@@ -66,8 +66,8 @@ woodward_sub_values = { # doi: 10.1021/jo01164a003, doi: 10.1021/jo01085a617
 }
 
 woodward_refine_sub_values = {
-    "alpha":  {"alkoxy": 28, "hydroxy": 38, "alkyl": 11, "bromo": 38, "chloro": 28, "carboxy": 12},
-    "beta":   {"alkoxy": 22, "hydroxy": 14, "alkyl": 18, "bromo": 33, "chloro": 22, "carboxy": 12},
+    "alpha":  {"alkoxy": 29, "hydroxy": 38, "alkyl": 11, "bromo": 38, "chloro": 28, "carboxy": 12},
+    "beta":   {"alkoxy": 22, "hydroxy": 14, "alkyl": 19, "bromo": 33, "chloro": 22, "carboxy": 12},
     "gamma":  {"alkoxy": 17, "hydroxy": 50, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12},
     "higher": {"alkoxy": 31, "hydroxy":  0, "alkyl": 18, "bromo":  0, "chloro": 12, "carboxy": 12}
 }

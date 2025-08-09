@@ -45,7 +45,7 @@ sub_value_library = {
     "woodward_extended": woodward_sub_values,
     "woodward": woodward_sub_values,
     "woodward_refine": woodward_refine_sub_values,
-    "woodward_coumarin": woodward_refine_sub_values,
+    "woodward_coumarin": woodward_coumarin_sub_values,
 }
 
 factor_value_library = {

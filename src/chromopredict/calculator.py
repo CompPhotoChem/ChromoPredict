@@ -177,6 +177,8 @@ def __coumarin_calc(
     # increments for substituents
     total += max([sub["value"] for sub in subs if sub["sub_type"] == "alpha"], default=0)
     total += max([sub["value"] for sub in subs if sub["sub_type"] == "beta"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "gamma"], default=0)
+    total += max([sub["value"] for sub in subs if sub["sub_type"] == "higher"], default=0)
     
     # solvent
     total += solvent_values.get(solvent, 0)
@@ -188,6 +190,8 @@ def __coumarin_calc(
         # increments for substituents
         d_contrib["alpha"], d_contrib['alpha_all']  = __get_max_sub(pos="alpha", subs=subs)
         d_contrib["beta"], d_contrib["beta_all"] = __get_max_sub(pos="beta", subs=subs)
+        d_contrib["gamma"], d_contrib["gamma_all"] = __get_max_sub(pos="gamma", subs=subs)
+        d_contrib["higher"], d_contrib["higher_all"] = __get_max_sub(pos="higher", subs=subs)
         
         # solvent
         d_contrib["solvent"] = solvent_values.get(solvent, 0)
@@ -242,7 +246,7 @@ def __select_mol_type(mol_type_auto, chromlib=None):
 
     # Define categories as sets
     categories = {
-        'woodward': {'woodward', 'woodward_extended', 'woodward_refine'},
+        'woodward': {'woodward', 'woodward_extended', 'woodward_refine', 'woodward_coumarin'},
         'fieser': {'fieser'},
         'fieser_kuhn': {'fieser_kuhn'},
     }
@@ -308,9 +312,13 @@ def predict(
     # handle rule set selection with user constraints
     mol_type = __select_mol_type(mol_type_auto, chromlib)
 
-    # get baselib and factor lib
-    base = get_libData(mol, mol_type, base_library, 0)
-    factor = get_libData(mol, mol_type, factor_library, 1)
+    if mol_type in ['woodward', 'woodward_refine']:
+        # get baselib and factor lib
+        base = get_libData(mol, 'woodward', base_library, 0)
+        factor = get_libData(mol, 'woodward', factor_library, 1)
+    else:
+        base = get_libData(mol, mol_type, base_library, 0)
+        factor = get_libData(mol, mol_type, factor_library, 1)
 
     if mol_type == "woodward_extended" and factor is not None:
         mol_type = "woodward"
@@ -337,7 +345,7 @@ def predict(
         pred, contrib = __woodward_extended_calc(base, factor, subs, mol, solvent, verbose)
 
     elif mol_type == 'woodward_coumarin':
-        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_refine_sub_values)
+        subs = get_woodward_sub_values(mol, sub_values_lib=woodward_coumarin_sub_values)
         pred, contrib = __coumarin_calc(base, factor, subs, mol, solvent, verbose, mol_type='woodward_refine')
 
     im = draw_images(mol)
