@@ -41,13 +41,12 @@ cyanide_base = {
 
 factors = {
     "homoanular_cyclodiene": "[#6]1=[#6]-[#6]=[#6]-[#6]-[#6]1",
-    "conjugated_double_bond": "[#6]=[#6]",
-    "endocyclic_double_bond": "[#6;R]=[#6;R]"
+    "endocyclic_double_bond": "[#6;R]=[#6;R]",
+    "conjugated_double_bond": "[#6]=[#6]"
 }
 
 fieser_kuhn_factors = {
-    "alkyl" : "[#6;X4]",
-    "endocyclic_double_bond": "[#6;R]=[#6;R]"
+    "conjugated_double_bond": "[#6]=[#6]"
 }
 
 cyanide_factors = {
@@ -62,6 +61,10 @@ fieser_subs = {
     "alkoxy": "[#8]-[#6]",
     "alkyl": "[#6;X4]",
     "carboxy": "[#6](=[#8])-[#8H]",
+}
+
+fieser_kuhn_subs = {
+    "alkyl" : "[#6;X4]"
 }
 
 woodward_subs = {
@@ -116,8 +119,7 @@ fieser_factor_values = { # doi: 10.1021/jo01164a003
 }
 
 fieser_kuhn_factor_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Regeln
-    "endocyclic_double_bond": 1,
-    "alkyl" : 1
+    "conjugated_double_bond": 1
 }
 
 cyanide_factor_values = {
@@ -139,6 +141,10 @@ fieser_sub_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Regeln
     "halogen": 10, 
     "phenoxy": 18, 
     "thioether": 30
+}
+
+fieser_kuhn_sub_values = { #https://de.wikipedia.org/wiki/Woodward-Fieser-Regeln
+    "alkyl": 1
 }
 
 cyanide_sub_values = {
@@ -168,7 +174,7 @@ base_library = {
 
 sub_library = {
     "fieser": fieser_subs,
-    "fieser_kuhn": "None",
+    "fieser_kuhn": fieser_kuhn_subs,
     "woodward_extended": woodward_subs,
     "woodward": woodward_subs,
     "cyanide": cyanide_subs
@@ -192,7 +198,7 @@ base_value_library = {
 
 sub_value_library = {
     "fieser": fieser_sub_values,
-    "fieser_kuhn": "None",
+    "fieser_kuhn": fieser_kuhn_sub_values,
     "woodward_extended": woodward_sub_values,
     "woodward": woodward_sub_values,
     "cyanide": cyanide_sub_values
@@ -225,11 +231,12 @@ def check_pattern(mol, patterns, mark, version, mol_type):
     somethingFound = True
 
     if version > 0:
-        if mol_type == "woodward":
-            addFactor = 1
+        addFactor = 0
+        if version != 2:
+            addFactor += 1
         curProps = [str(i) for i in range(version + addFactor)]
         newProp = str(version)
-
+        
     while somethingFound:
         somethingFound = False
         big_break = False
@@ -250,7 +257,7 @@ def check_pattern(mol, patterns, mark, version, mol_type):
 
                     if mark:
                         for idx in match:
-                            if patternName != "homoanular_cyclic":  # "homoanular_cyclodiene"
+                            if patternName not in ["homoanular_cyclic", "alpha_beta_ketone"]:  # "homoanular_cyclodiene"
                                 mol.GetAtomWithIdx(idx).SetProp("used", "0")
                             else:
                                 atom = mol.GetAtomWithIdx(idx)
@@ -377,19 +384,26 @@ def count_exo_bonds(mol):
                     count += 1
     return count
 
+def count_endo_bonds(mol):
+    count = 0
+
+    for match in mol.GetSubstructMatches(Chem.MolFromSmarts("[#6;R]=[#6;R]")):
+        count += 1
+    return count
+
 def count_single_double(mol):
     smarts = "[#6]=[#6]-[#6]=[#6]-[#6]=[#6]-[#6]=[#6]"
-    count = 10
+    count = 4
     exists = True
 
     while exists:
+        smarts += "-[#6]=[#6]"
         pattern = Chem.MolFromSmarts(smarts)
 
         matches = mol.GetSubstructMatches(pattern)
 
         if matches:
-            smarts += "-[#6]=[#6]"
-            count += 2
+            count += 1
         else:
             exists = False
     return count
@@ -491,10 +505,10 @@ def combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended):
             print("Exo-Value:", count_exo_bonds(mol) * 5)
     
     elif mol_type == "fieser_kuhn":
-        factors = check_values(factor, mol_type, factor_value_library, False)
-        m = factors.get("alkyl", 0)
+        sub = check_values(subs, mol_type, sub_value_library, False)
+        m = sub.get("alkyl", 0)
         n = count_single_double(mol)
-        endo = factors.get("endocyclic_double_bond", 0)
+        endo = count_endo_bonds(mol)
         exo = count_exo_bonds(mol)
         total = 114 + 5 * m + 48 * n - 1.7 * n ** 2 - 16.5 * endo - 10 * exo
         epsilon = 17400 * n
@@ -554,11 +568,11 @@ def draw_images(mol):
             val = atom.GetProp("used")
             highlight_atoms.append(idx)
             if val == "0":
-                highlight_atom_colors[idx] = (0.0, 1.0, 1.0)
+                highlight_atom_colors[idx] = (0.0, 1.0, 1.0) # Türkis
             elif val == "1":
-                highlight_atom_colors[idx] = (0.0, 1.0, 0.0)
+                highlight_atom_colors[idx] = (0.0, 1.0, 0.0) # Grün
             elif val == "2":
-                highlight_atom_colors[idx] = (0.0, 0.0, 1.0)
+                highlight_atom_colors[idx] = (0.0, 0.0, 1.0) # Blau
             elif val == "3":
                 highlight_atom_colors[idx] = (1.0, 1.0, 0.0)
             elif val == "4":
@@ -580,7 +594,7 @@ def main(smiles, solvent, draw=False, debug = False, extended = True):
         return None
     base = get_libData(mol, mol_type, base_library, 0)
     factor = get_libData(mol, mol_type, factor_library, 1)
-
+    
     if mol_type == "woodward_extended" and factor is not None:
         mol_type = "woodward"
     if mol_type not in ["woodward", "woodward_extended"]:
@@ -595,10 +609,10 @@ def main(smiles, solvent, draw=False, debug = False, extended = True):
 
     return combine_data(base, factor, subs, mol_type, mol, solvent, debug, extended)  #, im
 
-smiles = "CC=CC=CC=CC(=O)O"
-solvent = "CCO"
+smiles = r"CC1=C(C(CCC1)(C)C)/C=C/C(=C/C=C/C(=C/C=C/C=C(/C=C/C=C(/C=C/C2=C(CCCC2(C)C)C)\C)\C)/C)/C"
+solvent = r"C1CCCCC1"
 
-print(main(smiles, solvent, debug = True, extended = False))
+print(main(smiles, solvent, draw = True, debug = True, extended = False))
 
 # neue test smiles:
 #I CC(=O)C1=C(C)CCCC1	CCO	247	
@@ -617,9 +631,8 @@ print(main(smiles, solvent, debug = True, extended = False))
    
    
    
-   
-   
-   
+# CC1=C(C(CCC1)(C)C)/C=C/C(=C/C=C/C(=C/C=C/C=C(/C=C/C=C(/C=C/C2=C(CCCC2(C)C)C)/C)/C)/C)/C beta-carotine in C1CCCCC1 453 bis 456
+
    
    
    
@@ -634,7 +647,7 @@ print(main(smiles, solvent, debug = True, extended = False))
 #     "CC13CCC=CC1=CCC2CCCCC23", 234
 #     "CC(=O)OC1=CCC3(C)C(=C1)C=CC2CCCCC23", #309
 #     "C=C1CCCCC1=C", 234
-#     "[N+](C)=C1C=CC=CC1=CC=CC=C2C=CC=CC2=[N+](C)C", 407
+#     "C[N+](C)=C1C=CC=CC1=CC=CC=C2C=CC=CC2=[N+](C)C", 407
 #
 #     "CC(C=CC=O)Cl", woodward 228, has 222
 #     "OCC(C=CC=O)C" woodward 222, has 222
