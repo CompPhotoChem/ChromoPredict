@@ -60,9 +60,8 @@ def check_pattern(
 
                     if mark:
                         for idx in match:
-                            if patternName != "homoanular_cyclic":  # "homoanular_cyclodiene"
+                            if patternName not in ["homoanular_cyclic", "alpha_beta_ketone"]:
                                 mol.GetAtomWithIdx(idx).SetProp("used", "0")
-                                #print(mol.GetAtomWithIdx(idx).GetProp('used'))
                             else:
                                 atom = mol.GetAtomWithIdx(idx)
                                 in_double_bond = False
