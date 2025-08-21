@@ -33,3 +33,44 @@ Application of extended Woodward-Fieser rules to predict the absorption maxima o
     </td>
   </tr>
 </table>
+
+## Installation
+
+This project is based on RDKit and the tutorials are provided as Jupyter notebooks.
+All dependencies are listed in the `requirements.txt` file from which one can install the necessary packages. 
+If you're using a requirements.txt file, navigate to its directory and run:
+
+```
+pip install requirements.txt
+```
+
+Alternatively, you can install the packages directly:
+
+```
+pip install numpy pandas rdkit seaborn jupyterlab notebook py3Dmol
+```
+
+## Usage
+
+The basic usage of the tool is outlined in the ![tutorial notebook](https://github.com/CompPhotoChem/ChromoPredict/blob/main/examples/01_tutorial_ChromoPredict.ipynb). 
+For example, to predict the absorption maximum of the enon shown above, one can run:
+
+```python
+
+import chromopredict as cp
+
+# original woodward-fieser rules
+abs_max, description, image = cp.predict(
+  smiles='CC(=O)C1=C(C)CCCC1',
+  solvent=None,
+  verbose=True, # return increments of all structural features
+  chromlib='woodward')
+
+#refined rules by us
+abs_max, description, image = cp.predict(
+  smiles='CC(=O)C1=C(C)CCCC1',
+  solvent=None,
+  verbose=True,
+  chromlib='woodward_refine')
+
+```
