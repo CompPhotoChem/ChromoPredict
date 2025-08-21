@@ -1,6 +1,7 @@
 # ChromoPredict
 
 Automated application of Woodward-Fieser, Fieser and Fieser-Kuhn rules to predict absorption maxima of enones, dienes and systems with more than four conjugated carbon-carbon double bonds.
+Application of extended Woodward-Fieser rules to predict the absorption maxima of 3,4,6-substituted coumarins.
 
 ## Woodward-Type Examples
 
