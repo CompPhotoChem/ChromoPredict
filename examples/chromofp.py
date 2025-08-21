@@ -11,6 +11,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
 
+sys.path.append('../../Woodward_Fieser_Rules-main/src/')
+import chromopredict as cp
+
 ############################################################
 # --- Random Forest Helpers
 ###########################################################
@@ -174,6 +177,45 @@ def get_fmfp_pred(case, X_test, model, params):
     pred = model.predict(unseen_df)[0]
 
     return int(pred)
+
+###########################################################
+# --- helper function to get woodward features
+###########################################################
+
+def process_smiles_df(df, y_str='nm_b3lyp'):
+    """
+    Given a dataframe with a 'smiles' column, compute Woodward-Fieser descriptors,
+    extract numeric contributions, and return a processed dataframe ready for modeling.
+    """
+
+    # Helper functions
+    def get_first_value(lst):
+        if isinstance(lst, list) and lst and isinstance(lst[0], dict):
+            return lst[0].get("value", 0)
+        return 0
+
+    def get_descr(smiles):
+        _, descr, _ = cp.predict(smiles, solvent=None, verbose=True, draw=False, chromlib='woodward')
+        return descr
+
+    # Compute Woodward-Fieser descriptors for each SMILES
+    df = df.copy()  # avoid modifying original df
+    df['descr'] = df['smiles'].apply(get_descr)
+
+    # Expand 'descr' column into separate columns
+    df_descr = pd.concat([df.drop(columns='descr'), df['descr'].apply(pd.Series)], axis=1)
+
+    # Add numeric alpha/beta contributions and total substituents
+    df_descr = df_descr.assign(
+        alpha_num = df_descr['alpha_all'].apply(get_first_value),
+        beta_num  = df_descr['beta_all'].apply(get_first_value),
+        Nsub      = df_descr.apply(lambda row: len(row['alpha_all']) + len(row['beta_all']), axis=1)
+    )
+
+    # Select columns for modeling
+    df_processed = df_descr[['smiles', y_str, 'nm_wf', 'nm_wfr', 'base', 'exo', 'alpha_num', 'beta_num', 'Nsub']]
+
+    return df_processed
 
 ############################################################
 # --- Plot Helper Function
