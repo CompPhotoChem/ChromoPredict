@@ -3,12 +3,14 @@
 # base chromophore units 
 
 woodward_base = {
+    "cyclohexenone": "[#6;r6]=[#6;r6][#6](=[#8])[#6]", #"[#6]1[#6][#6][#6][#6]=[#6]1(=[#8])",
+    "cyclopentenone": "[#6;r5]=[#6;r5][#6](=[#8])[#6]",
     "alpha_beta_aldehyd": "[#6]=[#6]-[#6;H1](=[#8])",
     "alpha_beta_ketone": "[#6]=[#6]-[#6](=[#8])-[#6]",
     "alpha_beta_ester": "[#6]=[#6]-[#6](=[#8])-[#8]-[#6]",
     "alpha_beta_acid": "[#6]=[#6][#6](=[#8])[O;H1,-1]",
     "cyclohexanone": "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1(=[#8])",
-    "cyclopentenone": "[#6]1:[#6]:[#6]:[#6]:[#6]:1(=[#8])",
+    "cyclopentanone": "[#6]1:[#6]:[#6]:[#6]:[#6]:1(=[#8])",
 }
 
 woodward_coumarin = {
@@ -19,8 +21,10 @@ woodward_base_values = { # doi: textbook
     "alpha_beta_aldehyd": 210,
     "alpha_beta_ketone": 215,
     "alpha_beta_ester": 195,
-    "cyclopentenone": 202,
+    "cyclopentanone": 202,
     "cyclohexanone": 215, # doi: 10.1021/jo01164a003
+    "cyclopentenone": 202,
+    "cyclohexenone": 215, # doi: 10.1021/jo01164a003
     "alpha_beta_acid" : 195, 
 }
 
@@ -28,8 +32,10 @@ woodward_refine_base_values = { # doi: textbook
     "alpha_beta_aldehyd": 218,
     "alpha_beta_ketone": 212,
     "alpha_beta_ester": 195, #not refined
-    "cyclopentenone": 191, 
-    "cyclohexanone": 206,
+    "cyclopentenone": 193, #191 
+    "cyclohexenone": 208, #206,
+    "cyclopentanone": 202, # not refined
+    "cyclohexanone": 215, # not refined
     "alpha_beta_acid" : 196, 
     # introduced by us
     "alpha_beta_coumarin": 312,
