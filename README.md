@@ -35,6 +35,8 @@
   </tr>
 </table>
 
+-------
+
 ## Installation
 
 This project is based on RDKit and the tutorials are provided as Jupyter notebooks.
