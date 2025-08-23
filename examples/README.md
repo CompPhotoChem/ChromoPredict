@@ -1,3 +1,8 @@
+# Tutorials
+
+- [Basic usage of chromopredict](https://github.com/CompPhotoChem/ChromoPredict/blob/main/examples/01_tutorial_ChromoPredict.ipynb)
+- [Comparison of random forest predictions employing structural features and Wodward-Fieser estimations, usage of Woodward-Fieser features as descriptors in random forest models](https://github.com/CompPhotoChem/ChromoPredict/blob/main/examples/02_RF_Prediction_enones.ipynb)
+
 # Examples
 
 In this directory, you find code examples and tutorials to demonstrate the functionality of the ChromoPredict tool
