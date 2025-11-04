@@ -77,3 +77,8 @@ abs_max, description, image = cp.predict(
   chromlib='woodward_refine')
 
 ```
+
+## Citation
+
+[![DOI](https://zenodo.org/badge/17520032.svg)](https://doi.org/10.5281/zenodo.17520032)
+
