@@ -40,11 +40,11 @@
 ## Installation
 
 This project is based on RDKit and the tutorials are provided as Jupyter notebooks.
-All dependencies are listed in the `requirements.txt` file from which one can install the necessary packages. 
-If you're using a requirements.txt file, navigate to its directory and run:
+All dependencies are listed in the `requirements.txt` file. 
+To install them the pyproject.toml can be used via:
 
 ```
-pip install requirements.txt
+pip install -e
 ```
 
 Alternatively, you can install the packages directly:
