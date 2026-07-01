@@ -13,3 +13,5 @@ dependencies:
   - anaconda::scikit-learn
   - anaconda::seaborn
 prefix: /home/carom/anaconda3/envs/digichem
+
+#this will not work with the isntallation guide in the read me file
