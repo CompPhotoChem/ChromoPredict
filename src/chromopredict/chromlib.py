@@ -4,12 +4,12 @@ from chromopredict.woodwardfieser import *
 
 # library of base chromophores
 base_library = {
-    "fieser": fieser_base,
     "fieser_kuhn": fieser_kuhn_base,
-    "woodward_extended": woodward_base,
-    "woodward": woodward_base,
-    "woodward_refine": woodward_base,
+    "fieser": fieser_base,
     "woodward_coumarin": woodward_coumarin,
+    "woodward_refine": woodward_base,
+    "woodward": woodward_base,
+    "woodward_extended": woodward_base,
 }
 
 sub_library = {
